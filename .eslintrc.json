@@ -39,6 +39,11 @@
         "no-console": [
             "off"
         ],
-        "prettier/prettier": "error"
+        "prettier/prettier": [
+            "error"
+        ],
+        "@typescript-eslint/no-inferrable-types": [
+            "off"
+        ]
     }
 }
