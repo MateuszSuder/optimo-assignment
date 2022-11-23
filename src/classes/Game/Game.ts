@@ -10,13 +10,14 @@ export default class Game implements IGame {
 	private app: Application;
 
 	constructor(sheets: GameSheets) {
+		const { canvasId, width, height } = config;
 		// Create pixi container
 		const container = document.createElement("div");
 		container.setAttribute("id", "pixi-content");
 
 		// Create canvas
 		const canvas = document.createElement("canvas");
-		canvas.setAttribute("id", config.canvasId);
+		canvas.setAttribute("id", canvasId);
 
 		// Append canvas to container
 		container.appendChild(canvas);
@@ -29,12 +30,14 @@ export default class Game implements IGame {
 			view: canvas,
 			resolution: window.devicePixelRatio || 1,
 			autoDensity: true,
-			width: window.innerWidth,
-			height: window.innerHeight,
+			width,
+			height,
+			backgroundColor: "#a98274",
 		});
 
-		new Player(sheets.character.textures["char_idle_0.png"], this.stage);
+		new Player(sheets.character.animations, this.stage, this.app.ticker);
 	}
+
 	/**
 	 * Resets game to initial state
 	 * @private
