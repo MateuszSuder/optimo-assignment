@@ -1,7 +1,7 @@
 import { Assets } from "pixi.js";
 import { LoaderAssets } from "./types/GameSheets";
 import config from "./config/config";
-import Game from "./classes/Game/Game";
+import Game from "./models/Game";
 
 (async () => {
 	const assets = config.assets;

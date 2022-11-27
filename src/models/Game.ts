@@ -1,8 +1,8 @@
 import { Application, Container, DisplayObject } from "pixi.js";
-import config from "../../config/config";
-import IGame from "../../inferfaces/IGame";
-import GameSheets from "../../types/GameSheets";
-import Player from "../Player/Player";
+import config from "../config/config";
+import IGame from "../inferfaces/IGame";
+import GameSheets from "../types/GameSheets";
+import Player from "./Player";
 
 export default class Game implements IGame {
 	private started: boolean = false;
