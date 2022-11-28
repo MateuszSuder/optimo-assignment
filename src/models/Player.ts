@@ -75,4 +75,8 @@ export default class Player extends Movable<AnimatedSprite> {
 	private update(delta: number) {
 		this.object.x = this.object.x + this.velocity * delta;
 	}
+
+	public getBounds() {
+		return this.object.getBounds();
+	}
 }

@@ -1,10 +1,23 @@
-import { Application, Container, DisplayObject } from "pixi.js";
+import {
+	Application,
+	Container,
+	DisplayObject,
+	Spritesheet,
+	Ticker,
+} from "pixi.js";
 import config from "../config/config";
 import IGame from "../inferfaces/IGame";
 import GameSheets from "../types/GameSheets";
 import Player from "./Player";
+import randomInt from "../utils/randomInt";
+import Food from "./Food";
+import Stats from "./Stats";
 
 export default class Game implements IGame {
+	private readonly foodTextures: Spritesheet["textures"];
+	private player: Player;
+	private food?: Food;
+	private stats?: Stats;
 	private started: boolean = false;
 	private points: number = 0;
 	private app: Application;
@@ -35,7 +48,39 @@ export default class Game implements IGame {
 			backgroundColor: "#a98274",
 		});
 
-		new Player(sheets.character.animations, this.stage, this.app.ticker);
+		this.player = new Player(
+			sheets.character.animations,
+			this.stage,
+			this.app.ticker
+		);
+
+		this.foodTextures = sheets.food.textures;
+		this.start();
+	}
+
+	start(): void {
+		this.points = 0;
+		this.spawnFood();
+		if (this.food)
+			this.stats = new Stats(
+				this.player,
+				this.food,
+				this.ticker,
+				this.stage,
+				() => {
+					console.log("catch");
+				},
+				() => {
+					this.food?.destroy();
+					this.spawnFood();
+
+					if (this.stats) {
+						this.food && this.stats.setFood(this.food);
+						this.player && this.stats.setPlayer(this.player);
+					}
+				}
+			);
+		return;
 	}
 
 	/**
@@ -44,16 +89,25 @@ export default class Game implements IGame {
 	 */
 	private reset(): void {}
 
-	start(): void {
-		this.points = 0;
-		return;
-	}
-
 	stop(): void {
 		return;
 	}
 
+	private get foodTexture() {
+		const textures = Object.keys(this.foodTextures);
+		const rand = randomInt(textures.length);
+		return this.foodTextures[textures[rand]];
+	}
+
+	private spawnFood() {
+		this.food = new Food(this.foodTexture, this.ticker, this.stage);
+	}
+
 	get stage(): Container<DisplayObject> {
 		return this.app.stage;
+	}
+
+	get ticker(): Ticker {
+		return this.app.ticker;
 	}
 }

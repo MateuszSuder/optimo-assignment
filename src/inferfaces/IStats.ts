@@ -1,6 +1,6 @@
 interface IStats {
-	getLives(): number;
-	getPoints(): number;
+	lives: number;
+	score: number;
 	reset(): void;
 }
 
