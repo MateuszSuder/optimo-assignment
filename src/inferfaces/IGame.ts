@@ -1,9 +1,8 @@
-import { Container, DisplayObject } from "pixi.js";
+import { Container, DisplayObject, Ticker } from "pixi.js";
 
 interface IGame {
-	start(): void;
-	stop(): void;
 	get stage(): Container<DisplayObject>;
+	get ticker(): Ticker;
 }
 
 export default IGame;

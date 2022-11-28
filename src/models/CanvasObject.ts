@@ -12,4 +12,8 @@ export default abstract class CanvasObject<
 
 		this.stage.addChild(this.object);
 	}
+
+	public destroyObject() {
+		this.stage.removeChild(this.object);
+	}
 }

@@ -12,13 +12,13 @@ import Player from "./Player";
 import randomInt from "../utils/randomInt";
 import Food from "./Food";
 import Stats from "./Stats";
+import GameOver from "./GameOver";
 
 export default class Game implements IGame {
 	private readonly foodTextures: Spritesheet["textures"];
-	private player: Player;
+	private readonly player: Player;
 	private food?: Food;
 	private stats?: Stats;
-	private started: boolean = false;
 	private points: number = 0;
 	private app: Application;
 
@@ -58,9 +58,11 @@ export default class Game implements IGame {
 		this.start();
 	}
 
-	start(): void {
+	private start(): void {
 		this.points = 0;
+		this.ticker.start();
 		this.spawnFood();
+		this.stats && this.stats.destroy();
 		if (this.food)
 			this.stats = new Stats(
 				this.player,
@@ -68,28 +70,29 @@ export default class Game implements IGame {
 				this.ticker,
 				this.stage,
 				() => {
-					console.log("catch");
-				},
-				() => {
 					this.food?.destroy();
 					this.spawnFood();
-
-					if (this.stats) {
-						this.food && this.stats.setFood(this.food);
-						this.player && this.stats.setPlayer(this.player);
+				},
+				(lives: number) => {
+					if (lives === 0) {
+						this.over();
+					} else {
+						this.food?.destroy();
+						this.spawnFood();
 					}
 				}
 			);
 		return;
 	}
 
-	/**
-	 * Resets game to initial state
-	 * @private
-	 */
-	private reset(): void {}
+	private restart() {
+		this.start();
+	}
 
-	stop(): void {
+	private over(): void {
+		this.food && this.food.destroy();
+		this.ticker.stop();
+		new GameOver(this.stage, this.restart.bind(this));
 		return;
 	}
 
@@ -100,7 +103,16 @@ export default class Game implements IGame {
 	}
 
 	private spawnFood() {
-		this.food = new Food(this.foodTexture, this.ticker, this.stage);
+		this.food = new Food(
+			this.foodTexture,
+			this.ticker,
+			this.stage,
+			(this.stats?.score || 0) + 1
+		);
+
+		if (this.stats) {
+			this.food && this.stats.setFood(this.food);
+		}
 	}
 
 	get stage(): Container<DisplayObject> {

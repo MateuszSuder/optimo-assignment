@@ -7,8 +7,10 @@ import Food from "./Food";
 import CanvasObject from "./CanvasObject";
 
 enum STATS_CHILDREN {
-	lives = "LIVES",
-	score = "SCORE",
+	LIVES = "LIVES",
+	LIVES_LABEL = "LIVES_LABEL",
+	SCORE = "SCORE",
+	SCORE_LABEL = "SCORE_LABEL",
 }
 
 /**
@@ -19,17 +21,17 @@ enum STATS_CHILDREN {
 const createStatsContainer = (l: number, p: number) => {
 	const container = new Container();
 	const livesLabel = new Text("Lives: ");
+	livesLabel.name = STATS_CHILDREN.LIVES_LABEL;
 	const scoreLabel = new Text("Score: ");
+	scoreLabel.name = STATS_CHILDREN.SCORE_LABEL;
 	const lives = new Text(l);
-	lives.name = STATS_CHILDREN.lives;
+	lives.name = STATS_CHILDREN.LIVES;
 	const score = new Text(p);
-	score.name = STATS_CHILDREN.score;
+	score.name = STATS_CHILDREN.SCORE;
 	container.addChild(livesLabel, scoreLabel, lives, score);
 	container.position.set(0, config.height - container.height);
 	livesLabel.x = 0;
 	lives.x = livesLabel.width;
-	scoreLabel.x = config.width - scoreLabel.width - score.width;
-	score.x = config.width - score.width;
 	return container;
 };
 
@@ -37,10 +39,13 @@ export default class Stats
 	extends CanvasObject<Container<DisplayObject>>
 	implements IStats
 {
+	private readonly onCatch: () => void;
+	private readonly onMiss: (lives: number) => void;
 	private player: Player;
 	private food: Food;
-	private _lives: number = 10;
+	private _lives: number = config.lives;
 	private _score: number = 0;
+	private ticker: Ticker;
 
 	constructor(
 		player: Player,
@@ -48,38 +53,38 @@ export default class Stats
 		ticker: Ticker,
 		stage: Container<DisplayObject>,
 		onCatch: () => void,
-		onMiss: () => void
+		onMiss: (lives: number) => void
 	) {
-		super(stage, createStatsContainer(10, 0));
+		super(stage, createStatsContainer(config.lives, 0));
 		this.player = player;
 		this.food = food;
+		this.ticker = ticker;
+		this.onCatch = onCatch;
+		this.onMiss = onMiss;
 		this.reset();
-		ticker.add(() => {
-			try {
-				const foodBounds = this.food.getBounds();
-				const playerBounds = this.player.getBounds();
+		this.ticker.add(this.checkHit, this);
+	}
 
-				if (hitTestRectangle(foodBounds, playerBounds)) {
-					onCatch();
-					this.score++;
-				}
+	private checkHit() {
+		const foodBounds = this.food.getBounds();
+		const playerBounds = this.player.getBounds();
 
-				if (foodBounds.y > config.height) {
-					onMiss();
-					this.lives--;
-				}
-			} catch (e) {
-				console.log(e);
-			}
-		});
+		if (hitTestRectangle(foodBounds, playerBounds)) {
+			this.score++;
+			this.onCatch();
+		}
+
+		if (foodBounds.y > config.height) {
+			this.lives--;
+			this.onMiss(this.lives);
+		}
 	}
 
 	public set lives(n: number) {
 		this._lives = n;
 		const livesObject: Text = this.object.getChildByName(
-			STATS_CHILDREN.lives
+			STATS_CHILDREN.LIVES
 		);
-		console.log(livesObject);
 		livesObject.text = this._lives;
 	}
 
@@ -90,9 +95,16 @@ export default class Stats
 	public set score(n: number) {
 		this._score = n;
 		const scoreObject: Text = this.object.getChildByName(
-			STATS_CHILDREN.score
+			STATS_CHILDREN.SCORE
 		);
+		const scoreLabelObject: Text = this.object.getChildByName(
+			STATS_CHILDREN.SCORE_LABEL
+		);
+
 		scoreObject.text = this._score;
+		scoreLabelObject.x =
+			config.width - scoreLabelObject.width - scoreObject.width;
+		scoreObject.x = config.width - scoreObject.width;
 	}
 
 	public get score(): number {
@@ -100,7 +112,7 @@ export default class Stats
 	}
 
 	public reset(): void {
-		this.lives = 10;
+		this.lives = config.lives;
 		this.score = 0;
 	}
 
@@ -108,7 +120,8 @@ export default class Stats
 		this.food = f;
 	}
 
-	public setPlayer(p: Player) {
-		this.player = p;
+	public destroy() {
+		this.destroyObject();
+		this.ticker.remove(this.checkHit, this);
 	}
 }

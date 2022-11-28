@@ -4,12 +4,17 @@ import randomInt from "../utils/randomInt";
 import config from "../config/config";
 
 export default class Food extends AnimatedObject<Sprite> {
+	private readonly difficulty: number = 1;
+
 	constructor(
 		texture: Texture,
 		ticker: Ticker,
-		stage: Container<DisplayObject>
+		stage: Container<DisplayObject>,
+		difficulty: number
 	) {
 		super(ticker, stage, new Sprite(texture));
+
+		this.difficulty = difficulty;
 
 		this.object.scale.set(1.5);
 		this.object.anchor.set(0.5);
@@ -21,7 +26,9 @@ export default class Food extends AnimatedObject<Sprite> {
 
 	private gameLoop(delta: number) {
 		this.object.rotation = this.object.rotation + Math.PI / 180;
-		this.object.y += 5 * delta;
+		this.object.y +=
+			Math.min(Math.max(2 + Math.pow(1.05, this.difficulty), 3), 5) *
+			delta;
 	}
 
 	private animateObject() {
@@ -33,7 +40,7 @@ export default class Food extends AnimatedObject<Sprite> {
 	}
 
 	public destroy() {
-		this.removeLoop(this.gameLoop);
 		this.object.destroy();
+		this.removeLoop(this.gameLoop);
 	}
 }
