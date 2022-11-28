@@ -1,5 +1,8 @@
 import { AnimatedSprite, Container, DisplayObject, Sprite } from "pixi.js";
 
+/**
+ * Basic canvas object
+ */
 export default abstract class CanvasObject<
 	T extends Sprite | AnimatedSprite | Container<DisplayObject>
 > {
@@ -13,7 +16,10 @@ export default abstract class CanvasObject<
 		this.stage.addChild(this.object);
 	}
 
-	public destroyObject() {
+	/**
+	 * Remove canvas object
+	 */
+	public destroyObject(): void {
 		this.stage.removeChild(this.object);
 	}
 }

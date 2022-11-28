@@ -2,12 +2,16 @@ import {
 	AnimatedSprite,
 	Container,
 	DisplayObject,
+	Rectangle,
 	Texture,
 	Ticker,
 } from "pixi.js";
 import Movable from "./InteractiveObject";
 import config from "../config/config";
 
+/**
+ * Class used for creating player object
+ */
 export default class Player extends Movable<AnimatedSprite> {
 	private readonly textures: Record<string, Texture[]>;
 	private animationName: "idle" | "left" | "right" = "idle";
@@ -23,7 +27,11 @@ export default class Player extends Movable<AnimatedSprite> {
 		this.addLoop(this.update);
 	}
 
-	private initPlayer() {
+	/**
+	 * Initiates player element
+	 * @private
+	 */
+	private initPlayer(): void {
 		const { width, height } = config;
 
 		this.object.scale = { x: 2, y: 2 };
@@ -34,6 +42,7 @@ export default class Player extends Movable<AnimatedSprite> {
 		this.handleMovement();
 		this.object.play();
 
+		// Add handlers for movement
 		this.addHandler("left", (isDown) => {
 			this.animationName = isDown ? "left" : "idle";
 			this.handleMovement();
@@ -45,7 +54,11 @@ export default class Player extends Movable<AnimatedSprite> {
 		});
 	}
 
-	private handleMovement() {
+	/**
+	 * Function which handles movement depending on current animation
+	 * @private
+	 */
+	private handleMovement(): void {
 		if (this.animationName === "idle") {
 			this.object.animationSpeed = 0.05;
 			this.velocity = 0;
@@ -66,17 +79,28 @@ export default class Player extends Movable<AnimatedSprite> {
 			this.object.animationSpeed = 0.25;
 		}
 
+		// Replace textures if designed are different from current
 		if (this.object.textures !== this.textures[this.animationName])
 			this.object.textures = this.textures[this.animationName];
 
+		// Play animation
 		this.object.play();
 	}
 
-	private update(delta: number) {
+	/**
+	 * Event loop to update player position
+	 * @param {@link PIXI.Ticker#deltaTime} delta
+	 * @private
+	 */
+	private update(delta: number): void {
 		this.object.x = this.object.x + this.velocity * delta;
 	}
 
-	public getBounds() {
+	/**
+	 * Returns player bounds
+	 * @return {@link Rectangle}
+	 */
+	public getBounds(): Rectangle {
 		return this.object.getBounds();
 	}
 }

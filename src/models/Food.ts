@@ -1,8 +1,18 @@
 import AnimatedObject from "./AnimatedObject";
-import { Container, DisplayObject, Sprite, Texture, Ticker } from "pixi.js";
+import {
+	Container,
+	DisplayObject,
+	Rectangle,
+	Sprite,
+	Texture,
+	Ticker,
+} from "pixi.js";
 import randomInt from "../utils/randomInt";
 import config from "../config/config";
 
+/**
+ * Class used to create food element
+ */
 export default class Food extends AnimatedObject<Sprite> {
 	private readonly difficulty: number = 1;
 
@@ -24,22 +34,38 @@ export default class Food extends AnimatedObject<Sprite> {
 		this.animateObject();
 	}
 
-	private gameLoop(delta: number) {
+	/**
+	 * Game loop used to animate food object
+	 * @param {@link PIXI.Ticker#deltaTime} delta
+	 * @private
+	 */
+	private gameLoop(delta: number): void {
 		this.object.rotation = this.object.rotation + Math.PI / 180;
 		this.object.y +=
 			Math.min(Math.max(2 + Math.pow(1.05, this.difficulty), 3), 5) *
 			delta;
 	}
 
-	private animateObject() {
+	/**
+	 * Function to start animation
+	 * @private
+	 */
+	private animateObject(): void {
 		this.addLoop(this.gameLoop);
 	}
 
-	public getBounds() {
+	/**
+	 * Returns object boundaries in rectangular shape
+	 * @return {@link Rectangle}
+	 */
+	public getBounds(): Rectangle {
 		return this.object.getBounds();
 	}
 
-	public destroy() {
+	/**
+	 * Destroys element
+	 */
+	public destroy(): void {
 		this.object.destroy();
 		this.removeLoop(this.gameLoop);
 	}

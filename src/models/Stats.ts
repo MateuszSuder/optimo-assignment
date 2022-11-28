@@ -65,7 +65,11 @@ export default class Stats
 		this.ticker.add(this.checkHit, this);
 	}
 
-	private checkHit() {
+	/**
+	 * Check if food hit player or ground
+	 * @private
+	 */
+	private checkHit(): void {
 		const foodBounds = this.food.getBounds();
 		const playerBounds = this.player.getBounds();
 
@@ -111,16 +115,26 @@ export default class Stats
 		return this._score;
 	}
 
+	/**
+	 * Resets stats
+	 */
 	public reset(): void {
 		this.lives = config.lives;
 		this.score = 0;
 	}
 
-	public setFood(f: Food) {
+	/**
+	 * Set food element
+	 * @param {@link Food} f element to be replaced
+	 */
+	public setFood(f: Food): void {
 		this.food = f;
 	}
 
-	public destroy() {
+	/**
+	 * Method to destroy element
+	 */
+	public destroy(): void {
 		this.destroyObject();
 		this.ticker.remove(this.checkHit, this);
 	}

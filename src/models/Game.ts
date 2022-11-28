@@ -2,7 +2,9 @@ import {
 	Application,
 	Container,
 	DisplayObject,
+	Resource,
 	Spritesheet,
+	Texture,
 	Ticker,
 } from "pixi.js";
 import config from "../config/config";
@@ -48,21 +50,33 @@ export default class Game implements IGame {
 			backgroundColor: "#a98274",
 		});
 
+		// Create new player object
 		this.player = new Player(
 			sheets.character.animations,
 			this.stage,
 			this.app.ticker
 		);
 
+		// Attach food textures to object
 		this.foodTextures = sheets.food.textures;
+
+		// Start game
 		this.start();
 	}
 
+	/**
+	 * Starts game
+	 * @private
+	 */
 	private start(): void {
-		this.points = 0;
+		// Start ticker
 		this.ticker.start();
 		this.spawnFood();
+
+		// Destroy stats if available
 		this.stats && this.stats.destroy();
+
+		// Create new stats object
 		if (this.food)
 			this.stats = new Stats(
 				this.player,
@@ -70,6 +84,7 @@ export default class Game implements IGame {
 				this.ticker,
 				this.stage,
 				() => {
+					// On catch clear element from screen then spawn next one
 					this.food?.destroy();
 					this.spawnFood();
 				},
@@ -77,6 +92,7 @@ export default class Game implements IGame {
 					if (lives === 0) {
 						this.over();
 					} else {
+						// On miss clear element from screen then spawn next one
 						this.food?.destroy();
 						this.spawnFood();
 					}
@@ -85,24 +101,46 @@ export default class Game implements IGame {
 		return;
 	}
 
-	private restart() {
+	/**
+	 * @see start
+	 * @private
+	 */
+	private restart(): void {
 		this.start();
 	}
 
+	/**
+	 * Function to end the game
+	 * @private
+	 */
 	private over(): void {
+		// Destroy leftover food elements
 		this.food && this.food.destroy();
+
+		// Stop the ticker
 		this.ticker.stop();
+
+		// Show game over screen
 		new GameOver(this.stage, this.restart.bind(this));
 		return;
 	}
 
-	private get foodTexture() {
+	/**
+	 * Get random food texture
+	 * @private
+	 */
+	private get foodTexture(): Texture<Resource> {
 		const textures = Object.keys(this.foodTextures);
 		const rand = randomInt(textures.length);
 		return this.foodTextures[textures[rand]];
 	}
 
+	/**
+	 * Creates new food object
+	 * @private
+	 */
 	private spawnFood() {
+		// Create new food element
 		this.food = new Food(
 			this.foodTexture,
 			this.ticker,
@@ -110,15 +148,22 @@ export default class Game implements IGame {
 			(this.stats?.score || 0) + 1
 		);
 
+		// If food created attach it to stats element
 		if (this.stats) {
 			this.food && this.stats.setFood(this.food);
 		}
 	}
 
+	/**
+	 * @return {@link Application.stage}
+	 */
 	get stage(): Container<DisplayObject> {
 		return this.app.stage;
 	}
 
+	/**
+	 * @return {@link Ticker}
+	 */
 	get ticker(): Ticker {
 		return this.app.ticker;
 	}
